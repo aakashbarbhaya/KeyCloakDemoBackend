@@ -1,3 +1,4 @@
+```
 #!/bin/bash
 
 # Input variables
@@ -27,3 +28,5 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO $db_user;
 EOF
 
 echo "Database setup complete: $db_name with user $db_user."
+
+```
