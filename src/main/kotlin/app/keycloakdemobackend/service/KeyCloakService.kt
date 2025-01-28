@@ -20,7 +20,7 @@ class KeycloakService(
     @Value("\${keycloak.credentials.secret}")
     lateinit var clientSecret: String
 
-    fun authenticate(username: String, password: String): Map<String, Any> {
+    fun login(username: String, password: String): Map<String, Any> {
         val tokenEndpoint = "$authServerUrl/realms/$realm/protocol/openid-connect/token"
 
         val response = webClient.build()

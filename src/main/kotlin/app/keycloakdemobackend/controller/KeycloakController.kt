@@ -24,7 +24,7 @@ class KeycloakController(
 
     @PostMapping("/auth/login")
     fun login(@RequestBody request: LoginRequest): ResponseEntity<Map<String, Any>> {
-        return ResponseEntity.ok(keycloakService.authenticate(request.username, request.password))
+        return ResponseEntity.ok(keycloakService.login(request.username, request.password))
     }
 
     @GetMapping("/public")
