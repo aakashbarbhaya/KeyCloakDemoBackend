@@ -1,5 +1,6 @@
 package app.keycloakdemobackend.controller
 
+import app.keycloakdemobackend.model.TokenResponse
 import app.keycloakdemobackend.service.KeycloakService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -23,7 +24,7 @@ class KeycloakController(
 ) {
 
     @PostMapping("/auth/login")
-    fun login(@RequestBody request: LoginRequest): ResponseEntity<Map<String, Any>> {
+    fun login(@RequestBody request: LoginRequest): ResponseEntity<TokenResponse> {
         return ResponseEntity.ok(keycloakService.login(request.username, request.password))
     }
 

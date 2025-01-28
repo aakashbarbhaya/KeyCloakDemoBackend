@@ -154,25 +154,21 @@ class KeycloakService(
     }
 
     private fun fetchAccessToken(): String {
-        try {
-            val tokenEndpoint = "$authServerUrl/realms/$realm/protocol/openid-connect/token"
+        val tokenEndpoint = "$authServerUrl/realms/$realm/protocol/openid-connect/token"
 
-            val response = webClient.build()
-                .post()
-                .uri(tokenEndpoint)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .bodyValue(
-                    "grant_type=client_credentials" +
-                            "&client_id=$clientId" +
-                            "&client_secret=$clientSecret"
-                )
-                .retrieve()
-                .bodyToMono(TokenResponse::class.java)
-                .block() ?: throw RuntimeException("Failed to fetch access token")
+        val response = webClient.build()
+            .post()
+            .uri(tokenEndpoint)
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .bodyValue(
+                "grant_type=client_credentials" +
+                        "&client_id=$clientId" +
+                        "&client_secret=$clientSecret"
+            )
+            .retrieve()
+            .bodyToMono(TokenResponse::class.java)
+            .block() ?: throw RuntimeException("Failed to fetch access token")
 
-            return response.access_token
-        } catch (e: Exception) {
-            throw RuntimeException("Failed to fetch access token", e)
-        }
+        return response.access_token
     }
 }
