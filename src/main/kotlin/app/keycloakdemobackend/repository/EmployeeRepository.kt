@@ -68,7 +68,7 @@ class EmployeeRepository(
                 employee.lastName,
                 employee.email,
                 employee.contactNumber,
-                employee.roles.toTypedArray(), // Convert List<String> to Array for PostgreSQL TEXT[]
+                employee.roles.toTypedArray(),
                 employee.status,
                 employee.createdAt,
                 employee.id

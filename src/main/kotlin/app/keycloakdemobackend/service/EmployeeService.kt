@@ -8,12 +8,20 @@ import java.util.UUID
 
 @Service
 class EmployeeService(
-    private val employeeRepository: EmployeeRepository
+    private val employeeRepository: EmployeeRepository,
+    private val keycloakService: KeycloakService
 ) {
     fun createEmployee(employee: Employee): Employee {
         val employeeToCreate = employee.copy(
             id = UUID.randomUUID().toString(),
             createdAt = Instant.now().epochSecond
+        )
+        keycloakService.createUser(
+            firstName = employee.firstName,
+            lastName = employee.lastName,
+            email = employee.email,
+            password = "1234",
+            roles = employee.roles
         )
         return employeeRepository.createEmployee(employeeToCreate)
     }
