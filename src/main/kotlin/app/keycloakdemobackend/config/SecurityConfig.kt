@@ -4,27 +4,30 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtDecoders
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 
 @Configuration
 class SecurityConfig {
 
+    private val keycloakIssuerUrl = "http://localhost:8080/realms/KeyCloakDemoBackend"
+    private val clientId = "keycloak-demo-spring-boot"
+
     @Bean
-    fun jwtDecoder(): JwtDecoder {
-        return JwtDecoders.fromIssuerLocation("http://0.0.0.0:8080/realms/KeyCloakDemoBackend")
-    }
+    fun jwtDecoder(): JwtDecoder = JwtDecoders.fromIssuerLocation(keycloakIssuerUrl)
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http
-            .csrf { it.disable() } // Updated csrf() API
+        return http
+            .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers("/public/**").permitAll() // Updated for the new matcher
+                    .requestMatchers("/public/**").permitAll()
                     .requestMatchers("/admin/**").hasRole("admin")
                     .requestMatchers("/employee/**").hasRole("employee")
                     .requestMatchers("/auth/**").permitAll()
@@ -38,17 +41,27 @@ class SecurityConfig {
                     jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
                 }
             }
-        return http.build()
+            .build()
     }
 
     @Bean
     fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
-        val jwtGrantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
-        jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles")
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_")
-
         val jwtAuthenticationConverter = JwtAuthenticationConverter()
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter)
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter { jwt -> extractAuthorities(jwt) }
         return jwtAuthenticationConverter
+    }
+
+    private fun extractAuthorities(jwt: Jwt): Collection<GrantedAuthority> {
+        val authorities = mutableSetOf<GrantedAuthority>()
+
+        val resourceAccess = jwt.claims["resource_access"] as? Map<String, Any>
+        val clientRoles = resourceAccess?.get(clientId) as? Map<String, Any>
+        val roles = clientRoles?.get("roles") as? List<String>
+
+        roles?.forEach { role ->
+            authorities.add(SimpleGrantedAuthority("ROLE_$role"))
+        }
+
+        return authorities
     }
 }
