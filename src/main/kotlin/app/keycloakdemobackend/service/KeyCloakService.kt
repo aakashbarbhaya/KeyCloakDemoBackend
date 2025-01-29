@@ -1,6 +1,5 @@
 package app.keycloakdemobackend.service
 
-import app.keycloakdemobackend.model.KeycloakClient
 import app.keycloakdemobackend.model.KeycloakRole
 import app.keycloakdemobackend.model.KeycloakUser
 import app.keycloakdemobackend.model.TokenResponse
@@ -19,8 +18,11 @@ class KeycloakService(
     @Value("\${keycloak.realm}")
     lateinit var realm: String
 
-    @Value("\${keycloak.resource}")
+    @Value("\${keycloak.clientId}")
     lateinit var clientId: String
+
+    @Value("\${keycloak.client_key}")
+    lateinit var clientKey: String
 
     @Value("\${keycloak.credentials.secret}")
     lateinit var clientSecret: String
@@ -105,11 +107,10 @@ class KeycloakService(
     }
 
     private fun assignRolesToUser(userId: String, roles: List<String>, token: String) {
-        val clientId = getClientId(token)
-        val rolesEndpoint = "$authServerUrl/admin/realms/$realm/users/$userId/role-mappings/clients/$clientId"
+        val rolesEndpoint = "$authServerUrl/admin/realms/$realm/users/$userId/role-mappings/clients/$clientKey"
 
         val roleMappings = roles.map { roleName ->
-            getRoleDetails(roleName, clientId, token)
+            getRoleDetails(roleName, clientKey, token)
         }
 
         webClient.build()
@@ -126,8 +127,8 @@ class KeycloakService(
             .block()
     }
 
-    private fun getRoleDetails(roleName: String, clientId: String, token: String): KeycloakRole {
-        val rolesEndpoint = "$authServerUrl/admin/realms/$realm/clients/$clientId/roles/$roleName"
+    private fun getRoleDetails(roleName: String, clientKey: String, token: String): KeycloakRole {
+        val rolesEndpoint = "$authServerUrl/admin/realms/$realm/clients/$clientKey/roles/$roleName"
 
         return webClient.build()
             .get()
@@ -138,20 +139,6 @@ class KeycloakService(
             .block() ?: throw RuntimeException("Role not found: $roleName")
     }
 
-    private fun getClientId(token: String): String {
-        val clientsEndpoint = "$authServerUrl/admin/realms/$realm/clients"
-
-        val clients = webClient.build()
-            .get()
-            .uri(clientsEndpoint)
-            .header("Authorization", "Bearer $token")
-            .retrieve()
-            .bodyToMono(Array<KeycloakClient>::class.java)
-            .block() ?: throw RuntimeException("Failed to retrieve clients")
-
-        return clients.firstOrNull { it.clientId == this.clientId }?.id
-            ?: throw RuntimeException("Client not found")
-    }
 
     private fun fetchAccessToken(): String {
         val tokenEndpoint = "$authServerUrl/realms/$realm/protocol/openid-connect/token"

@@ -20,8 +20,3 @@ data class KeycloakRole(
     val id: String,
     val name: String
 )
-
-data class KeycloakClient(
-    val id: String,
-    val clientId: String
-)
