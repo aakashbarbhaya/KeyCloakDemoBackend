@@ -46,6 +46,25 @@ class KeycloakService(
             .block() ?: throw RuntimeException("Failed to authenticate with Keycloak")
     }
 
+    fun refreshToken(refreshToken: String): TokenResponse {
+        val tokenEndpoint = "$authServerUrl/realms/$realm/protocol/openid-connect/token"
+
+        return webClient.build()
+            .post()
+            .uri(tokenEndpoint)
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .bodyValue(
+                "grant_type=refresh_token" +
+                        "&client_id=$clientId" +
+                        "&client_secret=$clientSecret" +
+                        "&refresh_token=$refreshToken"
+            )
+            .retrieve()
+            .bodyToMono(TokenResponse::class.java)
+            .block() ?: throw RuntimeException("Failed to refresh token")
+    }
+
+
     fun createUser(
         firstName: String,
         lastName: String? = null,

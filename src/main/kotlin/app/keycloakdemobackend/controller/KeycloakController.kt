@@ -5,6 +5,7 @@ import app.keycloakdemobackend.service.KeycloakService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,9 +17,14 @@ data class LoginRequest(
     val password: String
 )
 
+data class RefreshTokenRequest(
+    val refreshToken: String
+)
+
+
 @CrossOrigin
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/v1")
 class KeycloakController(
     private val keycloakService: KeycloakService
 ) {
@@ -26,6 +32,11 @@ class KeycloakController(
     @PostMapping("/auth/login")
     fun login(@RequestBody request: LoginRequest): ResponseEntity<TokenResponse> {
         return ResponseEntity.ok(keycloakService.login(request.username, request.password))
+    }
+
+    @PostMapping("/auth/refresh-token")
+    fun refreshToken(@RequestBody refreshTokenRequest: RefreshTokenRequest): ResponseEntity<TokenResponse> {
+        return ResponseEntity.ok(keycloakService.refreshToken(refreshTokenRequest.refreshToken))
     }
 
     @GetMapping("/public")

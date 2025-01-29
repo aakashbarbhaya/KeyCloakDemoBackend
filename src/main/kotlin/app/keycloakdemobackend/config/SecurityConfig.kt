@@ -27,10 +27,10 @@ class SecurityConfig {
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers("/public/**").permitAll()
-                    .requestMatchers("/admin/**").hasRole("admin")
-                    .requestMatchers("/employee/**").hasRole("employee")
-                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/api/v1/public/**").permitAll()
+                    .requestMatchers("/api/v1/admin/**").hasRole("admin")
+                    .requestMatchers("/api/v1/employee/**").hasRole("employee")
+                    .requestMatchers("/api/v1/auth/**").permitAll()
                     .anyRequest().authenticated()
             }
             .sessionManagement { session ->
