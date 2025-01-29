@@ -37,4 +37,13 @@ class EmployeeService(
         val employee = employeeRepository.getEmployeeById(id) ?: throw IllegalArgumentException("Employee ID cannot be null or blank.")
         return employee
     }
+
+    fun deactivateEmployee(id: String): Employee {
+        val employee = employeeRepository.getEmployeeById(id) ?: throw IllegalArgumentException("Employee ID cannot be null or blank.")
+        val employeeToDeactivate = employee.copy(
+            status = "inactive"
+        )
+        keycloakService.deactivateUserByUsername(username = employee.email)
+        return employeeRepository.updateEmployee(employeeToDeactivate)
+    }
 }

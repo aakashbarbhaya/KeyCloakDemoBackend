@@ -111,6 +111,36 @@ class KeycloakService(
         return userId
     }
 
+    fun deactivateUserByUsername(username: String) {
+        try {
+            val token = fetchAccessToken()
+            val userId = getUserIdByUsername(username, token)
+            deactivateUser(userId)
+        } catch (e: Exception) {
+            throw RuntimeException("Failed to deactivate user by username: $username", e)
+        }
+
+    }
+
+    private fun deactivateUser(userId: String) {
+        val token = fetchAccessToken()
+        val userEndpoint = "$authServerUrl/admin/realms/$realm/users/$userId"
+
+        val userUpdatePayload = mapOf(
+            "enabled" to false
+        )
+
+        webClient.build()
+            .put()
+            .uri(userEndpoint)
+            .header("Authorization", "Bearer $token")
+            .header("Content-Type", "application/json")
+            .bodyValue(userUpdatePayload)
+            .retrieve()
+            .toBodilessEntity()  // This handles 204 No Content response properly
+            .block() ?: throw RuntimeException("Failed to deactivate user")
+    }
+
     private fun getUserIdByUsername(username: String, token: String): String {
         val searchEndpoint = "$authServerUrl/admin/realms/$realm/users?username=$username"
 

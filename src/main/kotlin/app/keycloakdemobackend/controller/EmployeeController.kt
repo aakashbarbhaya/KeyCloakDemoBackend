@@ -4,6 +4,7 @@ import app.keycloakdemobackend.model.Employee
 import app.keycloakdemobackend.service.EmployeeService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -33,5 +34,11 @@ class EmployeeController(
     fun getEmployeeById(@PathVariable id: String): ResponseEntity<Employee> {
         val employee = employeeService.getEmployeeById(id)
         return ResponseEntity.ok(employee)
+    }
+
+    @DeleteMapping("/deactivate/{id}")
+    fun deactivateEmployee(@PathVariable id: String): ResponseEntity<Employee> {
+        val deactivatedEmployee = employeeService.deactivateEmployee(id)
+        return ResponseEntity.ok(deactivatedEmployee)
     }
 }
